@@ -22,17 +22,18 @@ def search_redirection(soup, roads):
     redirection = soup.find("span", class_="mw-redirectedfrom")
     if redirection is not None:
         redirection_title = redirection.a.attrs["title"]
-        print(redirection_title)
         roads.append(redirection_title)
 
 
 def find_title(soup, roads):
     page_title = soup.find(id="firstHeading").text
-    print(page_title)
     if page_title in roads:
         print("It leads to an infinite loop !")
         sys.exit()
     elif page_title == "Philosophy":
+        for road in roads:
+            print(road)
+        print(page_title)
         print("{nb_roads} roads from {fst_road} to philosophy !".format(
             nb_roads=len(roads) + 1, fst_road=roads[0]
         ))
@@ -43,8 +44,8 @@ def find_title(soup, roads):
 def find_next_article(soup):
     content = soup.find(id="mw-content-text")
     for a in content.select("p > a"):
-        href = a.attrs["href"]
-        if href.startswith("/wiki/") and ":" not in href:
+        href = a.attrs.get("href")
+        if href is not None and href.startswith("/wiki/") and ":" not in href:
             url = "https://en.wikipedia.org" + href
             try:
                 res = requests.get(url)
